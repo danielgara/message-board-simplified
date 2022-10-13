@@ -38,5 +38,5 @@ Route::group(['prefix' => 'v1/threads', 'middleware' => 'auth:sanctum'], functio
 Route::group(['prefix' => 'v1/user', 'middleware' => 'auth:sanctum'], function () {
     Route::get('/{user}/threads', [UserThreadMessageController::class, 'getUserThreads'])->name('api.v1.userThreadMessage.getUserThreads');
     Route::post('/{user}/threads/{thread}/messages', [UserThreadMessageController::class, 'createMessage'])->name('api.v1.userThreadMessage.createMessage');
-    //Route::patch('/messages/{messageId}', [UserThreadMessageController::class, 'updateMessage'])->where('messageId', '[0-9]+')->name('api.v1.userThreadMessage.updateMessage');
+    Route::patch('/messages/{message}', [UserThreadMessageController::class, 'updateMessage'])->name('api.v1.userThreadMessage.updateMessage');
 });

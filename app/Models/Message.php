@@ -43,6 +43,13 @@ class Message extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function isCreatedAtFewerThan5Minutes(): bool
+    {
+        $currentTimeMinusFiveMinutes = Carbon::now()->subMinutes(5)->toDateTimeString();
+
+        return $this->created_at >= $currentTimeMinusFiveMinutes ? true : false;
+    }
+
     public static function getMessagesByUserIdAndThreadIdAndSearchTerm(int $userId, int $threadId, string $searchTerm): ?Collection
     {
         return Message::where('user_id', '=', $userId)
@@ -50,12 +57,4 @@ class Message extends Model
                     ->where('body', 'LIKE', '%'.$searchTerm.'%')
                     ->get();
     }
-
-    /*
-    public function isCreatedAtFewerThan5Minutes(): bool
-    {
-        $currentTimeMinusFiveMinutes = Carbon::now()->subMinutes(5)->toDateTimeString();
-
-        return $this->getCreatedAt() >= $currentTimeMinusFiveMinutes ? true : false;
-    }*/
 }

@@ -55,46 +55,21 @@ class UserThreadMessageController extends BaseController
     /**
      * Update thread message.
      */
-    /*
-    public function updateMessage(UpdateMessageRequest $request): JsonResponse
+    public function updateMessage(UpdateMessageRequest $request, Message $message): JsonResponse
     {
-        try {
-            $message = $this->messageRepository->getById($request->message_id);
-
-            if (is_null($message)) {
-                $responseData = [];
-                $responseData['message'] = 'Message not found';
-
-                return $this->sendResponseError($responseData);
-            }
-
-            $user = Auth::user();
-            if (! $user->isCurrentUser($message->getUserId())) {
-                $responseData = [];
-                $responseData['message'] = 'User not allowed to update this message';
-
-                return $this->sendResponseError($responseData, 401);
-            }
-
-            if (! $message->isCreatedAtFewerThan5Minutes()) {
-                $responseData = [];
-                $responseData['message'] = 'User not allowed to update this message. Has passed more than five minutes since creation';
-
-                return $this->sendResponseError($responseData, 401);
-            }
-
-            $message->setBody($request->body);
-            $this->messageRepository->save($message);
-
+        if (! $message->isCreatedAtFewerThan5Minutes()) {
             $responseData = [];
-            $responseData['message'] = 'Message updated';
+            $responseData['message'] = 'User not allowed to update this message. Has passed more than five minutes since creation';
 
-            return $this->sendResponse($responseData);
-        } catch (Throwable $th) {
-            $responseData = [];
-            $responseData['message'] = $th->getMessage();
-
-            return $this->sendResponseError($responseData, 500);
+            return $this->sendResponseError($responseData, 401);
         }
-    }*/
+
+        $message->body = $request->body;
+        $message->save();
+
+        $responseData = [];
+        $responseData['message'] = 'Message updated';
+
+        return $this->sendResponse($responseData);
+    }
 }
