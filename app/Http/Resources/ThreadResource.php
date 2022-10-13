@@ -15,10 +15,10 @@ class ThreadResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->getId(),
-            'title' => $this->getTitle(),
-            'created_at' => $this->getCreatedAt(),
-            'updated_at' => $this->getUpdatedAt(),
+            'id' => $this->id,
+            'title' => $this->title,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

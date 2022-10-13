@@ -28,12 +28,11 @@ Route::group(['prefix' => 'v1/auth', 'middleware' => 'auth:sanctum'], function (
 });
 
 /* Thread routes with authentication */
-/*
 Route::group(['prefix' => 'v1/threads', 'middleware' => 'auth:sanctum'], function () {
     Route::post('/', [ThreadController::class, 'create'])->name('api.v1.threads.create');
     Route::get('/{thread}/messages', [ThreadController::class, 'getMessages'])->name('api.v1.threads.getMessages');
-    Route::post('/{threadId}/messages/search', [ThreadController::class, 'searchUserThreadMessages'])->where('threadId', '[0-9]+')->name('api.v1.threads.searchUserThreadMessages');
-});*/
+    Route::post('/{thread}/messages/search', [ThreadController::class, 'searchUserThreadMessages'])->name('api.v1.threads.searchUserThreadMessages');
+});
 
 /* UserThreadMessage routes with authentication */
 /*

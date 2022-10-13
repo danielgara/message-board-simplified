@@ -4,7 +4,7 @@ namespace App\Http\Requests\Thread;
 
 use App\Http\Requests\ApiFormRequest;
 
-class CreateThreadRequest extends ApiFormRequest
+class StoreThreadRequest extends ApiFormRequest
 {
     public function authorize()
     {
