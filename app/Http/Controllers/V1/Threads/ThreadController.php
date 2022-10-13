@@ -2,111 +2,68 @@
 
 namespace App\Http\Controllers\V1\Threads;
 
-use App\DTOs\ThreadDTO;
 use App\Http\Controllers\BaseController;
 use App\Http\Requests\Message\SearchMessageRequest;
-use App\Http\Requests\Thread\CreateThreadRequest;
-use App\Http\Resources\MessageResource;
+use App\Http\Requests\Thread\StoreThreadRequest;
 use App\Http\Resources\ThreadResource;
-use App\Interfaces\MessageRepositoryInterface;
-use App\Interfaces\ThreadRepositoryInterface;
+use App\Models\Message;
+use App\Models\Thread;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 class ThreadController extends BaseController
 {
-    private ThreadRepositoryInterface $threadRepository;
-
-    private MessageRepositoryInterface $messageRepository;
-
-    public function __construct(ThreadRepositoryInterface $threadRepository, MessageRepositoryInterface $messageRepository)
-    {
-        $this->threadRepository = $threadRepository;
-        $this->messageRepository = $messageRepository;
-    }
-
     /**
      * Create a thread in storage and returns it.
      */
-    public function create(CreateThreadRequest $request): JsonResponse
+    public function create(StoreThreadRequest $request): JsonResponse
     {
-        try {
-            $threadObject = ThreadDTO::fromRequest($request);
-            $thread = $this->threadRepository->save($threadObject);
+        $thread = Thread::create($request->validated());
 
-            $responseData = [];
-            $responseData['thread'] = new ThreadResource($thread);
+        $responseData = [];
+        $responseData['thread'] = new ThreadResource($thread);
 
-            return $this->sendResponse($responseData, 201);
-        } catch (Throwable $th) {
-            $responseData = [];
-            $responseData['message'] = $th->getMessage();
-
-            return $this->sendResponseError($responseData, 500);
-        }
+        return $this->sendResponse($responseData, 201);
     }
 
     /**
      * Returns thread messages by thread id
      */
-    public function getMessages(Thread $): JsonResponse
+    public function getMessages(Thread $thread): JsonResponse
     {
-        try {
-            $thread = $this->threadRepository->getById($threadId);
+        $messages = Message::where('thread_id', '=', $thread->id)->orderBy('created_at', 'desc')->get();
 
-            if (is_null($thread)) {
-                $responseData = [];
-                $responseData['message'] = 'Thread not found';
-
-                return $this->sendResponseError($responseData);
-            }
-
-            $messages = MessageResource::collection($this->messageRepository->getByThreadId($threadId));
-
-            if (count($messages) == 0) {
-                $responseData = [];
-                $responseData['message'] = 'Thread have not messages';
-
-                return $this->sendResponseError($responseData);
-            }
-
+        if (count($messages) == 0) {
             $responseData = [];
-            $responseData['messages'] = $messages;
+            $responseData['message'] = 'Thread have not messages';
 
-            return $this->sendResponse($responseData);
-        } catch (Throwable $th) {
-            $responseData = [];
-            $responseData['message'] = $th->getMessage();
-
-            return $this->sendResponseError($responseData, 500);
+            return $this->sendResponseError($responseData);
         }
+
+        $responseData = [];
+        $responseData['messages'] = $messages;
+
+        return $this->sendResponse($responseData);
     }
 
     /**
      * Returns all Messages that a given User has sent, that match a provided search term
      */
-    public function searchUserThreadMessages(SearchMessageRequest $request): JsonResponse
+    public function searchUserThreadMessages(SearchMessageRequest $request, Thread $thread): JsonResponse
     {
-        try {
-            $userId = Auth::user()->getId();
-            $messages = $this->messageRepository->getMessagesByUserIdAndThreadIdAndSearchTerm($userId, $request->thread_id, $request->search_term);
+        $userId = Auth::user()->id;
+        $messages = Message::getMesthresagesByUserIdAndThreadIdAndSearchTerm($userId, $thread->id, $request->search_term);
 
-            if (count($messages) == 0) {
-                $responseData = [];
-                $responseData['message'] = 'Messages not found';
-
-                return $this->sendResponseError($responseData);
-            }
-
+        if (count($messages) == 0) {
             $responseData = [];
-            $responseData['messages'] = $messages;
+            $responseData['message'] = 'Messages not found';
 
-            return $this->sendResponse($responseData);
-        } catch (Throwable $th) {
-            $responseData = [];
-            $responseData['message'] = $th->getMessage();
-
-            return $this->sendResponseError($responseData, 500);
+            return $this->sendResponseError($responseData);
         }
+
+        $responseData = [];
+        $responseData['messages'] = $messages;
+
+        return $this->sendResponse($responseData);
     }
 }
