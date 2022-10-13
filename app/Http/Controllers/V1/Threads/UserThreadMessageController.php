@@ -2,92 +2,60 @@
 
 namespace App\Http\Controllers\V1\Threads;
 
-use App\DTOs\MessageDTO;
 use App\Http\Controllers\BaseController;
-use App\Http\Requests\Message\CreateMessageRequest;
+use App\Http\Requests\Message\StoreMessageRequest;
 use App\Http\Requests\Message\UpdateMessageRequest;
 use App\Http\Resources\MessageResource;
-use App\Interfaces\MessageRepositoryInterface;
-use App\Interfaces\ThreadRepositoryInterface;
-use App\Interfaces\UserRepositoryInterface;
+use App\Models\Thread;
+use App\Models\Message;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 class UserThreadMessageController extends BaseController
 {
-    private ThreadRepositoryInterface $threadRepository;
-
-    private MessageRepositoryInterface $messageRepository;
-
-    private UserRepositoryInterface $userRepository;
-
-    public function __construct(UserRepositoryInterface $userRepository, ThreadRepositoryInterface $threadRepository, MessageRepositoryInterface $messageRepository)
-    {
-        $this->userRepository = $userRepository;
-        $this->threadRepository = $threadRepository;
-        $this->messageRepository = $messageRepository;
-    }
-
     /**
      * Create a message in storage and returns it.
      */
-    public function createMessage(CreateMessageRequest $request): JsonResponse
+    public function createMessage(StoreMessageRequest $request, User $user, Thread $thread): JsonResponse
     {
-        try {
-            $messageObject = MessageDTO::fromRequest($request);
-            $message = $this->messageRepository->save($messageObject);
+        $message = Message::create(array_merge(
+            $request->validated(),
+            [
+                'user_id' => $user->id,
+                'thread_id' => $thread->id,
+            ],
+        ));
 
-            $responseData = [];
-            $responseData['message'] = new MessageResource($message);
+        $responseData = [];
+        $responseData['message'] = new MessageResource($message);
 
-            return $this->sendResponse($responseData, 201);
-        } catch (Throwable $th) {
-            $responseData = [];
-            $responseData['message'] = $th->getMessage();
-
-            return $this->sendResponseError($responseData, 500);
-        }
+        return $this->sendResponse($responseData, 201);
     }
 
     /**
      * Get threads in which user has parcipated.
      */
-    public function getUserThreads(int $userId): JsonResponse
+    public function getUserThreads(User $user): JsonResponse
     {
-        try {
-            $user = $this->userRepository->getById($userId);
+        $threads = Thread::getThreadsByUserId($user->id);
 
-            if (is_null($user)) {
-                $responseData = [];
-                $responseData['message'] = 'User not found';
-
-                return $this->sendResponseError($responseData);
-            }
-
-            $threads = $this->threadRepository->getThreadsByUserId($userId);
-
-            if (count($threads) == 0) {
-                $responseData = [];
-                $responseData['message'] = 'Threads not found';
-
-                return $this->sendResponseError($responseData);
-            }
-
+        if (count($threads) == 0) {
             $responseData = [];
-            $responseData['threads'] = $threads;
+            $responseData['message'] = 'Threads not found';
 
-            return $this->sendResponse($responseData);
-        } catch (Throwable $th) {
-            $responseData = [];
-            $responseData['message'] = $th->getMessage();
-
-            return $this->sendResponseError($responseData, 500);
+            return $this->sendResponseError($responseData);
         }
+
+        $responseData = [];
+        $responseData['threads'] = $threads;
+
+        return $this->sendResponse($responseData);
     }
 
     /**
      * Update thread message.
      */
+    /*
     public function updateMessage(UpdateMessageRequest $request): JsonResponse
     {
         try {
@@ -128,5 +96,5 @@ class UserThreadMessageController extends BaseController
 
             return $this->sendResponseError($responseData, 500);
         }
-    }
+    }*/
 }

@@ -31,6 +31,18 @@ class Message extends Model
         'user_id',
     ];
 
+    /* Relationship to thread */
+    public function thread()
+    {
+        return $this->belongsTo(Thread::class);
+    }
+
+    /* Relationship to user */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public static function getMessagesByUserIdAndThreadIdAndSearchTerm(int $userId, int $threadId, string $searchTerm): ?Collection
     {
         return Message::where('user_id', '=', $userId)

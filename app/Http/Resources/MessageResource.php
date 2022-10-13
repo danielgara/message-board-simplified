@@ -15,12 +15,12 @@ class MessageResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->getId(),
-            'body' => $this->getBody(),
-            'user_id' => $this->getUserId(),
-            'thread_id' => $this->getThreadId(),
-            'created_at' => $this->getCreatedAt(),
-            'updated_at' => $this->getUpdatedAt(),
+            'id' => $this->id,
+            'body' => $this->body,
+            'user_id' => $this->user_id,
+            'thread_id' => $this->thread_id,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

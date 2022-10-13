@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Thread extends Model
 {
@@ -23,4 +25,17 @@ class Thread extends Model
     protected $fillable = [
         'title',
     ];
+
+    /* Relationship to messages */
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
+
+    public static function getThreadsByUserId(int $userId): ?Collection
+    {
+        return Thread::whereHas('messages', function (Builder $query) use ($userId) {
+            $query->where('user_id', '=', $userId);
+        })->get();
+    }
 }
