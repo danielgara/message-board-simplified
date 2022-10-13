@@ -2,44 +2,30 @@
 
 namespace App\Http\Controllers\V1\Auth;
 
-use App\DTOs\UserDTO;
 use App\Http\Controllers\BaseController;
-use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\LoginUserRequest;
+use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Resources\UserResource;
-use App\Interfaces\UserRepositoryInterface;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Throwable;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends BaseController
 {
-    private UserRepositoryInterface $userRepository;
-
-    public function __construct(UserRepositoryInterface $userRepository)
-    {
-        $this->userRepository = $userRepository;
-    }
-
     /**
-     * Create a user in storage and returns token
+     * Register a user in storage and returns token
      */
-    public function create(CreateUserRequest $request): JsonResponse
+    public function register(StoreUserRequest $request): JsonResponse
     {
-        try {
-            $userObject = UserDTO::fromRequest($request);
-            $user = $this->userRepository->save($userObject);
+        $user = User::create($request->validated());
+        $user->password = Hash::make($user->password);
+        $user->save();
 
-            $responseData = [];
-            $responseData['token'] = $user->createToken('auth_token')->plainTextToken;
+        $responseData = [];
+        $responseData['token'] = $user->createToken('auth_token')->plainTextToken;
 
-            return $this->sendResponse($responseData, 201);
-        } catch (Throwable $th) {
-            $responseData = [];
-            $responseData['message'] = $th->getMessage();
-
-            return $this->sendResponseError($responseData, 500);
-        }
+        return $this->sendResponse($responseData, 201);
     }
 
     /**
@@ -47,51 +33,28 @@ class AuthController extends BaseController
      */
     public function login(LoginUserRequest $request): JsonResponse
     {
-        try {
-            if (! Auth::attempt($request->only(['email', 'password']))) {
-                $responseData = [];
-                $responseData['message'] = 'Email & Password does not match with our record.';
-
-                return $this->sendResponseError($responseData, 401);
-            }
-
-            $user = Auth::user();
+        if (! Auth::attempt($request->only(['email', 'password']))) {
             $responseData = [];
-            $responseData['token'] = $user->createToken('auth_token')->plainTextToken;
+            $responseData['message'] = 'Email & Password does not match with our record.';
 
-            return $this->sendResponse($responseData);
-        } catch (Throwable $th) {
-            $responseData = [];
-            $responseData['message'] = $th->getMessage();
-
-            return $this->sendResponseError($responseData, 500);
+            return $this->sendResponseError($responseData, 401);
         }
+
+        $user = Auth::user();
+        $responseData = [];
+        $responseData['token'] = $user->createToken('auth_token')->plainTextToken;
+
+        return $this->sendResponse($responseData);
     }
 
     /**
-     * Returns a user by id
+     * Returns a user
      */
-    public function getUser(int $userId): JsonResponse
+    public function getUser(User $user): JsonResponse
     {
-        try {
-            $user = $this->userRepository->getById($userId);
+        $responseData = [];
+        $responseData['user'] = new UserResource($user);
 
-            if (is_null($user)) {
-                $responseData = [];
-                $responseData['message'] = 'User not found';
-
-                return $this->sendResponseError($responseData);
-            }
-
-            $responseData = [];
-            $responseData['user'] = new UserResource($user);
-
-            return $this->sendResponse($responseData);
-        } catch (Throwable $th) {
-            $responseData = [];
-            $responseData['message'] = $th->getMessage();
-
-            return $this->sendResponseError($responseData, 500);
-        }
+        return $this->sendResponse($responseData);
     }
 }

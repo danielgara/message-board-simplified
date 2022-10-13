@@ -8,7 +8,8 @@ class UpdateMessageRequest extends ApiFormRequest
 {
     public function authorize()
     {
-        $this->route("message"); //
+        $this->route('message'); //
+
         return true;
     }
 

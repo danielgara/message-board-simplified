@@ -4,7 +4,7 @@ namespace App\Http\Requests\User;
 
 use App\Http\Requests\ApiFormRequest;
 
-class CreateUserRequest extends ApiFormRequest
+class StoreUserRequest extends ApiFormRequest
 {
     public function authorize()
     {

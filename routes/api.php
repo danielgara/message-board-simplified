@@ -18,25 +18,27 @@ use Illuminate\Support\Facades\Route;
 
 /* Auth routes */
 Route::group(['prefix' => 'v1/auth'], function () {
-    Route::post('/create', [AuthController::class, 'create'])->name('api.v1.auth.create');
+    Route::post('/register', [AuthController::class, 'register'])->name('api.v1.auth.register');
     Route::post('/login', [AuthController::class, 'login'])->name('api.v1.auth.login');
 });
 
 /* Auth routes with authentication */
 Route::group(['prefix' => 'v1/auth', 'middleware' => 'auth:sanctum'], function () {
-    Route::get('/{userId}', [AuthController::class, 'getUser'])->where('userId', '[0-9]+')->name('api.v1.auth.getUser');
+    Route::get('/{user}', [AuthController::class, 'getUser'])->name('api.v1.auth.getUser');
 });
 
 /* Thread routes with authentication */
+/*
 Route::group(['prefix' => 'v1/threads', 'middleware' => 'auth:sanctum'], function () {
     Route::post('/', [ThreadController::class, 'create'])->name('api.v1.threads.create');
     Route::get('/{thread}/messages', [ThreadController::class, 'getMessages'])->name('api.v1.threads.getMessages');
     Route::post('/{threadId}/messages/search', [ThreadController::class, 'searchUserThreadMessages'])->where('threadId', '[0-9]+')->name('api.v1.threads.searchUserThreadMessages');
-});
+});*/
 
 /* UserThreadMessage routes with authentication */
+/*
 Route::group(['prefix' => 'v1/user', 'middleware' => 'auth:sanctum'], function () {
     Route::get('/{userId}/threads', [UserThreadMessageController::class, 'getUserThreads'])->where('userId', '[0-9]+')->name('api.v1.userThreadMessage.getUserThreads');
     Route::post('/{userId}/threads/{threadId}/messages', [UserThreadMessageController::class, 'createMessage'])->where(['userId' => '[0-9]+', 'threadId' => '[0-9]+'])->name('api.v1.userThreadMessage.createMessage');
     Route::patch('/messages/{messageId}', [UserThreadMessageController::class, 'updateMessage'])->where('messageId', '[0-9]+')->name('api.v1.userThreadMessage.updateMessage');
-});
+});*/
