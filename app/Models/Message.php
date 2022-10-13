@@ -10,7 +10,7 @@ class Message extends Model
 {
     /**
      * Message Attributes
-     * $this->attributesid - int - contains the message primary key (id)
+     * $this->id - int - contains the message primary key (id)
      * $this->body - string - contains the message body
      * $this->thread_id - int - contains the referenced thread id
      * $this->user_id - int - contains the referenced user id

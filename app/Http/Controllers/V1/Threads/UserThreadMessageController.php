@@ -6,8 +6,8 @@ use App\Http\Controllers\BaseController;
 use App\Http\Requests\Message\StoreMessageRequest;
 use App\Http\Requests\Message\UpdateMessageRequest;
 use App\Http\Resources\MessageResource;
-use App\Models\Thread;
 use App\Models\Message;
+use App\Models\Thread;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 
