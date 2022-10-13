@@ -6,9 +6,11 @@ use App\Http\Controllers\BaseController;
 use App\Http\Requests\Message\StoreMessageRequest;
 use App\Http\Requests\Message\UpdateMessageRequest;
 use App\Http\Resources\MessageResource;
+use App\Jobs\ProcessMessageJob;
 use App\Models\Message;
 use App\Models\Thread;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 
 class UserThreadMessageController extends BaseController
@@ -25,6 +27,9 @@ class UserThreadMessageController extends BaseController
                 'thread_id' => $thread->id,
             ],
         ));
+
+        $processMessageJob = (new ProcessMessageJob())->delay(Carbon::now()->addMinute());
+        dispatch($processMessageJob);
 
         $responseData = [];
         $responseData['message'] = new MessageResource($message);
