@@ -26,13 +26,22 @@ class Thread extends Model
         'title',
     ];
 
-    /* Relationship to messages */
+    /**
+     * Relationship
+     * Get the messages for the thread.
+     */
     public function messages()
     {
         return $this->hasMany(Message::class);
     }
 
-    public static function getThreadsByUserId(int $userId): ?Collection
+    /**
+     * Find threads by user id.
+     *
+     * @param  int  $userId
+     * @return \Illuminate\Database\Eloquent\Collection|null
+     */
+    public static function findThreadsByUserId(int $userId): ?Collection
     {
         return Thread::whereHas('messages', function (Builder $query) use ($userId) {
             $query->where('user_id', '=', $userId);

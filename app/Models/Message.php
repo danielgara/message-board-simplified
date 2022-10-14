@@ -31,35 +31,61 @@ class Message extends Model
         'user_id',
     ];
 
-    /* Relationship to thread */
+    /**
+     * Relationship
+     * Get the thread in which the message is posted.
+     */
     public function thread()
     {
         return $this->belongsTo(Thread::class);
     }
 
-    /* Relationship to user */
+    /**
+     * Relationship
+     * Get the user that posted the message.
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function isCreatedAtFewerThan5Minutes(): bool
+    /**
+     * Check if current message was created before than X minutes.
+     *
+     * @param  int  $minutes
+     * @return bool
+     */
+    public function isCreatedAtBeforeThanXMinutes(int $minutes): bool
     {
-        $currentTimeMinusFiveMinutes = Carbon::now()->subMinutes(5)->toDateTimeString();
+        $currentTimeMinusXMinutes = Carbon::now()->subMinutes($minutes)->toDateTimeString();
 
-        return $this->created_at >= $currentTimeMinusFiveMinutes ? true : false;
+        return $this->created_at >= $currentTimeMinusXMinutes ? true : false;
     }
 
-    public static function getMessagesByThreadIdAndOneMinuteAgo(int $threadId): ?Collection
+    /**
+     * Find messages by thread id and created before than X minutes.
+     *
+     * @param  int  $minutes
+     * @return \Illuminate\Database\Eloquent\Collection|null
+     */
+    public static function findMessagesByThreadIdAndXMinutesAgo(int $threadId, int $minutes): ?Collection
     {
-        $currentTimeMinusOneMinute = Carbon::now()->subMinutes(1)->toDateTimeString();
+        $currentTimeMinusXMinutes = Carbon::now()->subMinutes($minutes)->toDateTimeString();
 
         return Message::where('thread_id', '=', $threadId)
-                    ->where('created_at', '>=', $currentTimeMinusOneMinute)
+                    ->where('created_at', '>=', $currentTimeMinusXMinutes)
                     ->get();
     }
 
-    public static function getMessagesByUserIdAndThreadIdAndSearchTerm(int $userId, int $threadId, string $searchTerm): ?Collection
+    /**
+     * Find messages by user id, thread id, and search term (loosely).
+     *
+     * @param  int  $userId
+     * @param  int  $threadId
+     * @param  string  $searchTerm
+     * @return \Illuminate\Database\Eloquent\Collection|null
+     */
+    public static function findMessagesByUserIdAndThreadIdAndSearchTerm(int $userId, int $threadId, string $searchTerm): ?Collection
     {
         return Message::where('user_id', '=', $userId)
                     ->where('thread_id', '=', $threadId)

@@ -57,12 +57,21 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    /* Relationship to messages */
+    /**
+     * Relationship
+     * Get the messages for the user.
+     */
     public function messages()
     {
         return $this->hasMany(Message::class);
     }
 
+    /**
+     * Check if the received id matches with the current user id.
+     *
+     * @param  int  $id
+     * @return bool
+     */
     public function isCurrentUser(int $id): bool
     {
         return $this->id == $id ? true : false;

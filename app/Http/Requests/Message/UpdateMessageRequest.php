@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Auth;
 
 class UpdateMessageRequest extends ApiFormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
     public function authorize()
     {
         $user = Auth::user();
@@ -18,6 +23,11 @@ class UpdateMessageRequest extends ApiFormRequest
         return true;
     }
 
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
     public function rules()
     {
         return [

@@ -30,15 +30,18 @@ class ProcessMessageJob implements ShouldQueue
     {
         $jobs = Job::all();
         $threadActive = false;
-        if (count($jobs) > 0) {
-            foreach ($jobs as $job) {
-                $command = $job->payload['data']['command'];
-                $commandUnserialized = unserialize($command);
-                $jobThreadId = $commandUnserialized->threadId;
+        if (count($jobs) == 0) {
+            return;
+        }
 
-                if ($threadId == $jobThreadId) {
-                    $threadActive = true;
-                }
+        // con each de collection
+        foreach ($jobs as $job) {
+            $command = $job->payload['data']['command'];
+            $commandUnserialized = unserialize($command);
+            $jobThreadId = $commandUnserialized->threadId;
+
+            if ($threadId == $jobThreadId) {
+                $threadActive = true;
             }
         }
 
@@ -54,9 +57,10 @@ class ProcessMessageJob implements ShouldQueue
      */
     public function handle()
     {
-        $messages = Message::getMessagesByThreadIdAndOneMinuteAgo($this->threadId);
+        $messages = Message::findMessagesByThreadIdAndXMinutesAgo($this->threadId, 1);
         $numMessages = count($messages);
-        $userEmails = [];
+        //revisar
+        //$userEmails = $messages->pluck('user.email')->unique()->all();
         foreach ($messages as $message) {
             $email = $message->user->email;
             if (! in_array($email, $userEmails)) {
@@ -64,8 +68,12 @@ class ProcessMessageJob implements ShouldQueue
             }
         }
 
+        //storage file
+        error_log(' ');
+        error_log('---THREADS NEWS---');
         foreach ($userEmails as $userEmail) {
-            error_log('Hey '.$userEmail.' - there are '.$numMessages.' new messages in Thread '.$this->threadId);
+            //"$gggg" -> cambiar a este estilo
+            error_log("Hey $userEmail - there are $numMessages new messages in Thread $this->threadId");
         }
     }
 }

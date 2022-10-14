@@ -11,10 +11,16 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * This class is responsible for managing all api/v1/auth/* actions.
+ */
 class AuthController extends BaseController
 {
     /**
-     * Register a user in storage and returns token
+     * Register a user in storage and return json response with token.
+     *
+     * @param  \App\Http\Requests\User\StoreUserRequest  $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function register(StoreUserRequest $request): JsonResponse
     {
@@ -29,26 +35,31 @@ class AuthController extends BaseController
     }
 
     /**
-     * Login a user and returns token
+     * Login a user and return json response with token.
+     *
+     * @param  \App\Http\Requests\User\LoginUserRequest  $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function login(LoginUserRequest $request): JsonResponse
     {
+        $responseData = [];
         if (! Auth::attempt($request->only(['email', 'password']))) {
-            $responseData = [];
             $responseData['message'] = 'Email & Password does not match with our record.';
 
             return $this->sendResponseError($responseData, 401);
         }
 
         $user = Auth::user();
-        $responseData = [];
         $responseData['token'] = $user->createToken('auth_token')->plainTextToken;
 
         return $this->sendResponse($responseData);
     }
 
     /**
-     * Returns a user
+     * Return json response with user data.
+     *
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Http\JsonResponse
      */
     public function getUser(User $user): JsonResponse
     {

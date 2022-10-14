@@ -11,10 +11,16 @@ use App\Models\Thread;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * This class is responsible for managing all api/v1/threads/* actions.
+ */
 class ThreadController extends BaseController
 {
     /**
-     * Create a thread in storage and returns it.
+     * Create a thread in storage and return json response with thread.
+     *
+     * @param  \App\Http\Requests\Thread\StoreThreadRequest  $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function create(StoreThreadRequest $request): JsonResponse
     {
@@ -27,41 +33,45 @@ class ThreadController extends BaseController
     }
 
     /**
-     * Returns thread messages by thread id
+     * Return json response with messages find by thread id.
+     *
+     * @param  \App\Models\Thread  $thread
+     * @return \Illuminate\Http\JsonResponse
      */
     public function getMessages(Thread $thread): JsonResponse
     {
         $messages = Message::where('thread_id', '=', $thread->id)->orderBy('created_at', 'desc')->get();
-
+        $responseData = [];
         if (count($messages) == 0) {
-            $responseData = [];
             $responseData['message'] = 'Thread have not messages';
 
             return $this->sendResponseError($responseData);
         }
 
-        $responseData = [];
         $responseData['messages'] = $messages;
 
         return $this->sendResponse($responseData);
     }
 
     /**
-     * Returns all Messages that a given User has sent, that match a provided search term
+     * Return json response with messages of current user, find by thread id and search term.
+     *
+     * @param  \App\Http\Requests\Message\SearchMessageRequest  $request
+     * @param  \App\Models\Thread  $thread
+     * @return \Illuminate\Http\JsonResponse
      */
     public function searchUserThreadMessages(SearchMessageRequest $request, Thread $thread): JsonResponse
     {
         $userId = Auth::user()->id;
-        $messages = Message::getMesthresagesByUserIdAndThreadIdAndSearchTerm($userId, $thread->id, $request->search_term);
+        $messages = Message::findMessagesByUserIdAndThreadIdAndSearchTerm($userId, $thread->id, $request->search_term);
 
+        $responseData = [];
         if (count($messages) == 0) {
-            $responseData = [];
             $responseData['message'] = 'Messages not found';
 
             return $this->sendResponseError($responseData);
         }
 
-        $responseData = [];
         $responseData['messages'] = $messages;
 
         return $this->sendResponse($responseData);
