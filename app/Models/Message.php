@@ -50,6 +50,15 @@ class Message extends Model
         return $this->created_at >= $currentTimeMinusFiveMinutes ? true : false;
     }
 
+    public static function getMessagesByThreadIdAndOneMinuteAgo(int $threadId): ?Collection
+    {
+        $currentTimeMinusOneMinute = Carbon::now()->subMinutes(1)->toDateTimeString();
+
+        return Message::where('thread_id', '=', $threadId)
+                    ->where('created_at', '>=', $currentTimeMinusOneMinute)
+                    ->get();
+    }
+
     public static function getMessagesByUserIdAndThreadIdAndSearchTerm(int $userId, int $threadId, string $searchTerm): ?Collection
     {
         return Message::where('user_id', '=', $userId)
