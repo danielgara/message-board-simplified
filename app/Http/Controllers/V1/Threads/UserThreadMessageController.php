@@ -30,7 +30,7 @@ class UserThreadMessageController extends BaseController
 
         $newJob = new ProcessMessageJob($thread->id);
         if ($newJob->threadId != 0) {
-            $processMessageJob = $newJob->delay(Carbon::now()->addSeconds(20));
+            $processMessageJob = $newJob->delay(Carbon::now()->addMinutes(1));
             dispatch($processMessageJob);
         }
 
