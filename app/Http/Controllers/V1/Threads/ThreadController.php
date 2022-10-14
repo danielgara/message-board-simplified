@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V1\Threads;
 use App\Http\Controllers\BaseController;
 use App\Http\Requests\Message\SearchMessageRequest;
 use App\Http\Requests\Thread\StoreThreadRequest;
+use App\Http\Resources\MessageResource;
 use App\Http\Resources\ThreadResource;
 use App\Models\Message;
 use App\Models\Thread;
@@ -48,7 +49,7 @@ class ThreadController extends BaseController
             return $this->sendResponseError($responseData);
         }
 
-        $responseData['messages'] = $messages;
+        $responseData['messages'] = MessageResource::collection($messages);
 
         return $this->sendResponse($responseData);
     }
@@ -72,7 +73,7 @@ class ThreadController extends BaseController
             return $this->sendResponseError($responseData);
         }
 
-        $responseData['messages'] = $messages;
+        $responseData['messages'] = MessageResource::collection($messages);
 
         return $this->sendResponse($responseData);
     }
