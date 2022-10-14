@@ -16,25 +16,38 @@ class ProcessMessageJob implements ShouldQueue
 
     /**
      * The thread id
+     * It will be stored in the job payload
      *
-     * @var string
+     * @var int
      */
     public $threadId = 0;
 
     /**
-     * Create a new job instance.
+     * Create a new ProcessMessageJob instance.
      *
+     * @param  int  $threadId
      * @return void
      */
     public function __construct(int $threadId)
     {
         $jobs = Job::all();
-        $threadActive = false;
+
+        /**
+         * If there are not current pending jobs continue with the job creation
+         * and assigned it the proper threadId
+         */
         if (count($jobs) == 0) {
+            $this->threadId = $threadId;
+
             return;
         }
 
-        // con each de collection
+        /**
+         * Check if there is a pending job for the current thread id (based on the payload information)
+         * if there is a current job for the current thread id, the job will be skipped
+         * otherwise, the job will be created
+         */
+        $threadActive = false;
         foreach ($jobs as $job) {
             $command = $job->payload['data']['command'];
             $commandUnserialized = unserialize($command);
@@ -42,6 +55,7 @@ class ProcessMessageJob implements ShouldQueue
 
             if ($threadId == $jobThreadId) {
                 $threadActive = true;
+                break;
             }
         }
 
@@ -57,22 +71,19 @@ class ProcessMessageJob implements ShouldQueue
      */
     public function handle()
     {
+        /**
+         * Obtain the messages that has been created in the last minute
+         * for the current executed job thread id, then, collect the
+         * user emails and console log the messages
+         */
         $messages = Message::findMessagesByThreadIdAndXMinutesAgo($this->threadId, 1);
         $numMessages = count($messages);
-        //revisar
-        //$userEmails = $messages->pluck('user.email')->unique()->all();
-        foreach ($messages as $message) {
-            $email = $message->user->email;
-            if (! in_array($email, $userEmails)) {
-                $userEmails[] = $email;
-            }
-        }
+        $userEmails = $messages->pluck('user.email')->unique()->values()->all();
 
-        //storage file
+        // To fix: Better implementation with Laravel Storage or Log
         error_log(' ');
-        error_log('---THREADS NEWS---');
+        error_log("---THREADS NEWS FOR THREAD: $this->threadId---");
         foreach ($userEmails as $userEmail) {
-            //"$gggg" -> cambiar a este estilo
             error_log("Hey $userEmail - there are $numMessages new messages in Thread $this->threadId");
         }
     }
