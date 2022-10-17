@@ -37,6 +37,11 @@ class UserThreadMessageController extends BaseController
         ));
 
         $newJob = new ProcessMessageJob($thread->id);
+        /**
+         * SH - I think Laravel avoids it, but technically 0 is a valid value for the id field. Would be better to
+         * use null to represent "no value". Or better still, use a factory method that returns null or throws an
+         * exception to indicate failure.
+         */
         if ($newJob->threadId != 0) {
             $processMessageJob = $newJob->delay(Carbon::now()->addMinutes(1));
             dispatch($processMessageJob);

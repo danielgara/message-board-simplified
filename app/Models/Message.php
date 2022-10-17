@@ -65,6 +65,9 @@ class Message extends Model
     /**
      * Find messages by thread id and created before than X minutes.
      *
+     * SH - Not wrong per-se, but in practice it's going to be better to use scopes and compose them as-needed rather
+     * than add a new static `findMessagesByX` function for every new use case.
+     *
      * @param  int  $minutes
      * @return \Illuminate\Database\Eloquent\Collection|null
      */
